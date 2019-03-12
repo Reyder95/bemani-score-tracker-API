@@ -1,24 +1,20 @@
 const Pool = require('pg').Pool;
 const bcrypt = require('bcrypt');
 
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'bemani-database',
-  password: 'drifter24',
-  port: '5432'
-});
+const pool = new Pool(require("./connection.json"));
 
 const saltRounds = 10;
-const myPlaintextPassword = "thisbemypassword";
 
 const getUsers = (req, res) => {
   pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) =>{
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-    res.status(200).json(results.rows)
+    else
+      res.status(200).json(results.rows)
   });
 }
 
@@ -28,25 +24,30 @@ const getUserById = (req, res) => {
     pool.query('SELECT * FROM users WHERE id = $1', [uid], (error, results) => {
       if (error)
       {
-        throw error;
+        res.status(400).json({
+          message: "UID format error"
+        });
       }
-
-      res.status(200).json(results.rows);
+      else
+        res.status(200).json(results.rows);
     });
 }
 
 const createUser = (req, res) => {
   const {username, password, email, bio, location, profilepicturepath, bannerpicturepath} = req.body;
 
-  bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+  bcrypt.hash(password, saltRounds, function(err, hash) {
     pool.query('INSERT INTO users (username, password, email, bio, location, profilepicturepath, bannerpicturepath) VALUES ($1, $2, $3, $4, $5, $6, $7)',
               [username, hash, email, bio, location, profilepicturepath, bannerpicturepath],
               (error, results) => {
       if (error)
       {
-        throw error;
+        res.status(400).json({
+          message: "Format error"
+        });
       }
-      res.status(200).send(`User added with ID: ${results.insertId}`);
+      else
+        res.status(200).send(`User added with ID: ${results.insertId}`);
     });
   });
 }
@@ -59,10 +60,12 @@ const getAllSongsOwnedByUserId = (req, res) => {
   pool.query(query, [uid], (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -74,10 +77,12 @@ const getAllSongsByCollection = (req, res) => {
   pool.query(query, [cid], (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -89,10 +94,12 @@ const getAllCollectionsByUser = (req, res) => {
   pool.query(query, [uid], (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -102,10 +109,12 @@ const getSongs = (req, res) => {
   pool.query(query, (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -117,10 +126,12 @@ const getSongById = (req, res) => {
   pool.query(query, [sid], (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -130,10 +141,12 @@ const getGames = (req, res) => {
   pool.query(query, (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -145,10 +158,12 @@ const getSongsByGame = (req, res) => {
   pool.query(query, [gid], (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
@@ -158,10 +173,12 @@ const getCollections = (req, res) => {
   pool.query(query, (error, results) => {
     if (error)
     {
-      throw error;
+      res.status(400).json({
+        message: "Format error"
+      });
     }
-
-    res.status(200).send(results.rows);
+    else
+      res.status(200).send(results.rows);
   });
 }
 
