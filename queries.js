@@ -123,7 +123,7 @@ const getCollections = (req, res) => {
 }
 
 const getScores = (req, res) => {
-  pool.query('SELECT * FROM scores ORDER BY id ASC', (error, results) =>{
+  pool.query('SELECT * FROM scores ORDER BY score DESC', (error, results) =>{
     genericGetResponse(error, results, res);
   });
 }
@@ -131,7 +131,7 @@ const getScores = (req, res) => {
 const getScoresByChartId = (req, res) => {
   const chid = parseInt(req.params.chid);
 
-  const query='SELECT * FROM scores WHERE chartid_fk = $1 ORDER BY id ASC'
+  const query='SELECT * FROM scores WHERE chartid_fk = $1 ORDER BY score DESC'
 
   pool.query(query, [chid], (error, results) =>{
     genericGetResponse(error, results, res);
