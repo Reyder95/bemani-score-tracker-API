@@ -129,11 +129,11 @@ const getScores = (req, res) => {
 }
 
 const getScoresByChartId = (req, res) => {
-  const chid = parseInt(req.params.sid);
+  const chid = parseInt(req.params.chid);
 
   const query='SELECT * FROM scores WHERE chartid_fk = $1 ORDER BY id ASC'
 
-  pool.query(query, [chid] (error, results) =>{
+  pool.query(query, [chid], (error, results) =>{
     genericGetResponse(error, results, res);
   });
 }
