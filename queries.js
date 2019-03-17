@@ -122,6 +122,78 @@ const getCollections = (req, res) => {
   });
 }
 
+const getScores = (req, res) => {
+  pool.query('SELECT * FROM scores ORDER BY id ASC', (error, results) =>{
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getScoresByChartId = (req, res) => {
+  const chid = parseInt(req.params.sid);
+
+  const query='SELECT * FROM scores WHERE chartid_fk = $1 ORDER BY id ASC'
+
+  pool.query(query, [chid] (error, results) =>{
+    genericGetResponse(error, results, res);
+  });
+}
+
+const uploadScore = (req, res) => {
+  const {score, location, userid_fk, chartid_fk, grade, clearpercent, clearlamp} = req.body;
+
+  pool.query('INSERT INTO scores (score, location, userid_fk, chartid_fk, grade, clearpercent, clearlamp) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [score, location, userid_fk, chartid_fk, grade, clearpercent, clearlamp],
+            (error, results) => {
+    if (error)
+    {
+      res.status(400).json({
+        message: "Format error"
+      });
+    }
+    else
+      res.status(200).send(`Score added with ID: ${results.insertId}`);
+  });
+}
+
+const getGoals = (req, res) => {
+  pool.query('SELECT * FROM goals ORDER BY id ASC', (error, results) =>{
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getGoalsByUser = (req, res) => {
+  const uid = parseInt(req.params.uid);
+
+  pool.query('SELECT * FROM goals WHERE userid_fk = $1 ORDER BY id ASC', [uid], (error, results) =>{
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getGoalsByStatus = (req, res) => {
+  const status = req.params.status;
+
+  pool.query('SELECT * FROM goals WHERE status = $1 ORDER BY id ASC', [status], (error, results) =>{
+    genericGetResponse(error, results, res);
+  });
+}
+
+const createCollection = (req, res) => {
+  const {collectionname, description, userid_fk, gameid_fk} = req.body;
+
+  pool.query('INSERT INTO users (collectionname, description, userid_fk, gameid_fk) VALUES ($1, $2, $3, $4,)',
+            [collectionname, description, userid_fk, gameid_fk],
+            (error, results) => {
+    if (error)
+    {
+      res.status(400).json({
+        message: "Format error"
+      });
+    }
+    else
+      res.status(200).send(`Collection added with ID: ${results.insertId}`);
+  });
+}
+
 module.exports = {
   getUsers,
   getUserById,
@@ -134,4 +206,11 @@ module.exports = {
   getGames,
   getSongsByGame,
   getCollections,
+  getScores,
+  getScoresByChartId,
+  uploadScore,
+  getGoals,
+  getGoalsByUser,
+  getGoalsByStatus,
+  createCollection
 }
