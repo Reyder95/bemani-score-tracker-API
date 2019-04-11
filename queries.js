@@ -194,6 +194,54 @@ const createCollection = (req, res) => {
   });
 }
 
+const getSongsByPage = (req, res) => {
+  const page = parseInt(req.params.page);
+  const entries = parseInt(req.params.entries);
+
+  pool.query('SELECT * FROM songs ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getGoalsByPage = (req, res) => {
+  const page = parseInt(req.params.page);
+  const entries = parseInt(req.params.entries);
+
+  pool.query('SELECT * FROM goals ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getUsersByPage = (req, res) => {
+  const page = parseInt(req.params.page);
+  const entries = parseInt(req.params.entries);
+
+  pool.query('SELECT * FROM users ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getScoresByChartIdAndUser = (req, res) => {
+  const chid = parseInt(req.params.chid);
+  const uid = parseInt(req.params.uid);
+
+  const query='SELECT * FROM scores WHERE chartid_fk = $1 AND userid_fk = $2 ORDER BY score DESC';
+
+  pool.query(query, [chid, uid], (error, results) =>{
+    genericGetResponse(error, results, res);
+  });
+}
+
+const getSongsInCollectionByPage = (req, res) => {
+  const cid = parseInt(req.params.cid);
+  const page = parseInt(req.params.page);
+  const entries = parseInt(req.params.entries);
+
+  pool.query('SELECT * FROM incollections WHERE collectionsid_fk = $1 ORDER BY songsid_fk ASC OFFSET $2 LIMIT $3', [cid, ((page-1)*entries), entries], (error, results) => {
+    genericGetResponse(error, results, res);
+  });
+}
+
 module.exports = {
   getUsers,
   getUserById,
@@ -212,5 +260,10 @@ module.exports = {
   getGoals,
   getGoalsByUser,
   getGoalsByStatus,
-  createCollection
+  createCollection,
+  getSongsByPage,
+  getUsersByPage,
+  getGoalsByPage,
+  getScoresByChartIdAndUser,
+  getSongsInCollectionByPage
 }
