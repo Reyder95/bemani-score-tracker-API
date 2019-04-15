@@ -195,8 +195,8 @@ const createCollection = (req, res) => {
 }
 
 const getSongsByPage = (req, res) => {
-  const page = parseInt(req.params.page);
-  const entries = parseInt(req.params.entries);
+  const page = parseInt(req.params.p);
+  const entries = parseInt(req.params.e);
 
   pool.query('SELECT * FROM songs ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
@@ -204,8 +204,8 @@ const getSongsByPage = (req, res) => {
 }
 
 const getGoalsByPage = (req, res) => {
-  const page = parseInt(req.params.page);
-  const entries = parseInt(req.params.entries);
+  const page = parseInt(req.params.p);
+  const entries = parseInt(req.params.e);
 
   pool.query('SELECT * FROM goals ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
@@ -213,8 +213,8 @@ const getGoalsByPage = (req, res) => {
 }
 
 const getUsersByPage = (req, res) => {
-  const page = parseInt(req.params.page);
-  const entries = parseInt(req.params.entries);
+  const page = parseInt(req.params.p);
+  const entries = parseInt(req.params.e);
 
   pool.query('SELECT * FROM users ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
@@ -234,8 +234,8 @@ const getScoresByChartIdAndUser = (req, res) => {
 
 const getSongsInCollectionByPage = (req, res) => {
   const cid = parseInt(req.params.cid);
-  const page = parseInt(req.params.page);
-  const entries = parseInt(req.params.entries);
+  const page = parseInt(req.params.p);
+  const entries = parseInt(req.params.e);
 
   pool.query('SELECT * FROM incollections WHERE collectionsid_fk = $1 ORDER BY songsid_fk ASC OFFSET $2 LIMIT $3', [cid, ((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);

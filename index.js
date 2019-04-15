@@ -47,13 +47,13 @@ app.get('/api/users/:uid/goals', db.getGoalsByUser);
 
 app.get('/api/goals/:status', db.getGoalsByStatus);
 
-app.get('/api/songs/:page/:entries', db.getSongsByPage);
+app.get('/api/songs/?p&e', db.getSongsByPage);
 
-app.get('/api/users/:page/:entries', db.getUsersByPage);
+app.get('/api/users/?p&e', db.getUsersByPage);
 
-app.get('/api/goals/:page/:entries', db.getGoalsByPage);
+app.get('/api/goals/?p&e', db.getGoalsByPage);
 
-app.get('/api/songs/:cid/:page/:entries', db.getSongsInCollectionByPage);
+app.get('/api/songs/:cid/?p&e', db.getSongsInCollectionByPage);
 
 app.get('/api/scores/:chid/:uid', db.getScoresByChartIdAndUser);
 
