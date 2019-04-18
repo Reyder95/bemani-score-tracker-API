@@ -39,20 +39,19 @@ const getUserById = (req, res) => {
 }
 
 const createUser = (req, res) => {
-  const {username, password, email, bio, location, profilepicturepath, bannerpicturepath} = req.body;
+  let {username, password, email, bio, location} = req.body;
+
+  if (!!!bio)
+    bio = "";
 
   bcrypt.hash(password, saltRounds, function(err, hash) {
-    pool.query('INSERT INTO users (username, password, email, bio, location, profilepicturepath, bannerpicturepath) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-              [username, hash, email, bio, location, profilepicturepath, bannerpicturepath],
+    pool.query('INSERT INTO users (username, password, email, bio, location) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+              [username, hash, email, bio, location],
               (error, results) => {
       if (error)
-      {
-        res.status(400).json({
-          message: "Format error"
-        });
-      }
+        res.status(500).json(error);
       else
-        res.status(200).send(`User added with ID: ${results.insertId}`);
+        res.status(201).send(`User added with ID: ${results.rows[0].id}`);
     });
   });
 }
