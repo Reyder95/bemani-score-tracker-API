@@ -47,6 +47,8 @@ app.get('/api/users/:uid/goals', db.getGoalsByUser);
 
 app.get('/api/goals/:status', db.getGoalsByStatus);
 
+app.get('/api/scores/:chid/:uid', db.getScoresByChartIdAndUser);
+
 app.post('/api/users', db.createUser);
 
 app.post('/api/scores', db.uploadScore);
