@@ -39,32 +39,37 @@ const getUserById = (req, res) => {
 }
 
 const createUser = (req, res) => {
-  const {username, password, email, bio, location, profilepicturepath, bannerpicturepath} = req.body;
+  let {username, password, email, bio, location} = req.body;
+
+  if (!!!bio)
+    bio = "";
 
   bcrypt.hash(password, saltRounds, function(err, hash) {
-    pool.query('INSERT INTO users (username, password, email, bio, location, profilepicturepath, bannerpicturepath) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-              [username, hash, email, bio, location, profilepicturepath, bannerpicturepath],
+    pool.query('INSERT INTO users (username, password, email, bio, location) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+              [username, hash, email, bio, location],
               (error, results) => {
       if (error)
-      {
-        res.status(400).json({
-          message: "Format error"
-        });
-      }
+        res.status(500).json(error);
       else
-        res.status(200).send(`User added with ID: ${results.insertId}`);
+        res.status(201).send(`User added with ID: ${results.rows[0].id}`);
     });
   });
 }
 
 const getAllSongsOwnedByUserId = (req, res) => {
   const uid = parseInt(req.params.uid);
+  const page = parseInt(req.query.p);
+  const entries = parseInt(req.query.e);
 
-  const query = 'SELECT DISTINCT s.* FROM songs AS s, songcollections AS sc, incollections AS ic WHERE ic.collectionsid_fk = sc.id AND ic.songsid_fk = s.id AND sc.userid_fk = $1';
-
-  pool.query(query, [uid], (error, results) => {
-    genericGetResponse(error, results, res);
-  });
+  if (page) {
+    pool.query('SELECT DISTINCT s.* FROM songs AS s, songcollections AS sc, incollections AS ic WHERE ic.collectionsid_fk = sc.id AND ic.songsid_fk = s.id AND sc.userid_fk = $1 OFFSET $2 LIMIT $3', [uid,((page-1)*entries), entries], (error, results) => {
+      genericGetResponse(error, results, res);
+    });
+  } else {
+    pool.query('SELECT DISTINCT s.* FROM songs AS s, songcollections AS sc, incollections AS ic WHERE ic.collectionsid_fk = sc.id AND ic.songsid_fk = s.id AND sc.userid_fk = $1', [uid], (error, results) => {
+      genericGetResponse(error, results, res);
+    });
+  }
 }
 
 const getAllSongsByCollection = (req, res) => {
@@ -128,26 +133,48 @@ const getGames = (req, res) => {
 
 const getSongsByGame = (req, res) => {
   const gid = parseInt(req.params.gid);
+  const page = parseInt(req.query.p);
+  const entries = parseInt(req.query.e);
 
-  const query = 'SELECT * FROM songs WHERE gameid_FK = $1';
-
-  pool.query(query, [gid], (error, results) => {
+  if (page) {
+    pool.query('SELECT * FROM songs WHERE gameid_FK = $1 OFFSET $2 LIMIT $3', [gid,((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
-  });
+    });
+  } else {
+    pool.query('SELECT * FROM songs WHERE gameid_FK = $1', [gid], (error, results) =>{
+    genericGetResponse(error, results, res);
+    });
+  }
 }
 
 const getCollections = (req, res) => {
-  const query = 'SELECT * FROM songcollections';
+  const page = parseInt(req.query.p);
+  const entries = parseInt(req.query.e);
 
-  pool.query(query, (error, results) => {
+  if (page) {
+    pool.query('SELECT * FROM songcollections OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
-  });
+    });
+  } else {
+    pool.query('SELECT * FROM songcollections', (error, results) =>{
+    genericGetResponse(error, results, res);
+    });
+  }
 }
 
 const getScores = (req, res) => {
-  pool.query('SELECT * FROM scores ORDER BY score DESC', (error, results) =>{
+  const page = parseInt(req.query.p);
+  const entries = parseInt(req.query.e);
+
+  if (page) {
+    pool.query('SELECT * FROM scores ORDER BY score DESC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
-  });
+    });
+  } else {
+    pool.query('SELECT * FROM scores ORDER BY score DESC', (error, results) =>{
+    genericGetResponse(error, results, res);
+    });
+  }
 }
 
 const getScoresByChartId = (req, res) => {
@@ -194,18 +221,34 @@ const getGoals = (req, res) => {
 
 const getGoalsByUser = (req, res) => {
   const uid = parseInt(req.params.uid);
+  const page = parseInt(req.query.p);
+  const entries = parseInt(req.query.e);
 
-  pool.query('SELECT * FROM goals WHERE userid_fk = $1 ORDER BY id ASC', [uid], (error, results) =>{
+  if (page) {
+    pool.query('SELECT * FROM goals WHERE userid_fk = $1 ORDER BY id ASC OFFSET $2 LIMIT $3', [uid,((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
-  });
+    });
+  } else {
+    pool.query('SELECT * FROM goals WHERE userid_fk = $1 ORDER BY id ASC', [uid], (error, results) =>{
+    genericGetResponse(error, results, res);
+    });
+  }
 }
 
 const getGoalsByStatus = (req, res) => {
   const status = req.params.status;
+  const page = parseInt(req.query.p);
+  const entries = parseInt(req.query.e);
 
-  pool.query('SELECT * FROM goals WHERE status = $1 ORDER BY id ASC', [status], (error, results) =>{
+  if (page) {
+    pool.query('SELECT * FROM goals WHERE status = $1 ORDER BY id ASC OFFSET $2 LIMIT $3', [status,((page-1)*entries), entries], (error, results) => {
     genericGetResponse(error, results, res);
-  });
+    });
+  } else {
+    pool.query('SELECT * FROM goals WHERE status = $1 ORDER BY id ASC', [status], (error, results) =>{
+    genericGetResponse(error, results, res);
+    });
+  }
 }
 
 const createCollection = (req, res) => {
