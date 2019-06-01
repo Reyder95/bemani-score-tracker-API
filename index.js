@@ -13,6 +13,12 @@ app.use (
   })
 );
 
+app.get('/', (req, res) => {
+  res.json({
+    info : 'Node.js, Express, and Postgres API for use with Bemani Score Tracker'
+  });
+});
+
 app.get('/api/users', db.getUsers);
 
 app.get('/api/users/:uid', db.getUserById);
