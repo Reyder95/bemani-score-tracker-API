@@ -103,11 +103,21 @@ const getSongs = (req, res) => {
   const entries = parseInt(req.query.e);
 
   if (page) {
-    pool.query('SELECT * FROM songs ORDER BY id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
-    genericGetResponse(error, results, res);
-    });
+    if (entries)
+    {
+      pool.query('SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY songs.id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
+      genericGetResponse(error, results, res);
+      });
+    }
+    else
+    {
+      pool.query('SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY songs.id ASC OFFSET $1 LIMIT 10', [((page-1)*10)], (error, results) => {
+      genericGetResponse(error, results, res);
+      });
+    }
+
   } else {
-    pool.query('SELECT * FROM songs ORDER BY id ASC', (error, results) =>{
+    pool.query('SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY id ASC', (error, results) =>{
     genericGetResponse(error, results, res);
     });
   }
