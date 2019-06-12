@@ -1,5 +1,7 @@
 const Pool = require('pg').Pool;
 const bcrypt = require('bcrypt');
+const escape = require('pg-escape');
+const linq = require('linqjs');
 
 const pool = new Pool(require("./connection.json"));
 
@@ -12,7 +14,7 @@ function genericGetResponse(error, results, response)
       error: "Database error"
     });
   else
-    response.status(200).json(results.rows);
+    response.status(200).json(results);
 }
 
 const getUsers = (req, res) => {
@@ -99,28 +101,41 @@ const getAllCollectionsByUser = (req, res) => {
 }
 
 const getSongs = (req, res) => {
+
   const page = parseInt(req.query.p);
   const entries = parseInt(req.query.e);
+  let search = req.query.s;
+  const level = parseInt(req.query.l);
+  const game = req.query.g;
 
-  if (page) {
-    if (entries)
+  pool.query("SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY songs.id ASC", (error, results) => {
+
+    let filteredResults = results.rows;
+
+    if (search)
     {
-      pool.query('SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY songs.id ASC OFFSET $1 LIMIT $2', [((page-1)*entries), entries], (error, results) => {
-      genericGetResponse(error, results, res);
-      });
-    }
-    else
-    {
-      pool.query('SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY songs.id ASC OFFSET $1 LIMIT 10', [((page-1)*10)], (error, results) => {
-      genericGetResponse(error, results, res);
-      });
+      search = search.toUpperCase().split(' ');
+      filteredResults = filteredResults.where(item =>
+        search.some(key => item.artist.toUpperCase().includes(key))
+        || search.some(key => item.title.toUpperCase().includes(key))
+      );
     }
 
-  } else {
-    pool.query('SELECT songs.*, json_agg(charts.* ORDER BY charts.level) AS charts FROM songs INNER JOIN charts ON charts.songid_fk = songs.id GROUP BY songs.id ORDER BY id ASC', (error, results) =>{
-    genericGetResponse(error, results, res);
-    });
-  }
+    if (level)
+    {
+      filteredResults = filteredResults.where(item => item.charts.some(chart => chart.level == level));
+    }
+
+    if (game)
+    {
+      filteredResults = filteredResults.where(item => item.gameversion == game);
+    }
+
+    //let newJSON = results.rows.where(item => item.charts.where(function(charts) { return charts.level <= 5 && charts.level >= 5 }).length > 0);
+
+    filteredResults = filteredResults.slice((page-1)*entries , ((page-1)*entries) + entries);
+    genericGetResponse(error, filteredResults, res);
+  });
 }
 
 const getSongById = (req, res) => {
@@ -309,4 +324,9 @@ module.exports = {
   getGoalsByStatus,
   createCollection,
   getScoresByChartIdAndUser
+}
+
+function setCharAt(str, index, chr) {
+  if (index > str.length-1) return str;
+  return str.substr(0, index) + chr + str.substr(index+1);
 }
