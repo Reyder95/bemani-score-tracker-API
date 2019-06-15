@@ -1,7 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./queries');
+//const db = require('./queries');
+const songs = require('./query-files/songs.js');
+const scores = require('./query-files/scores.js');
 const app = express();
 const port = 1337;
 
@@ -19,6 +21,21 @@ app.get('/', (req, res) => {
   });
 });
 
+// Song-related Endpoints (retrieving song or collection information)
+app.get('/api/v1/get_songs', songs.getSongs);   // Get songs
+
+app.get('/api/v1/get_song', songs.getSongById); // Get one song by song id
+
+app.get('/api/v1/get_collectionsongs', songs.getSongsByCollection); // Get all songs in a given collection id
+
+app.get('/api/v1/get_usersongs', songs.getSongsOwnedByUserId);  // Get all songs that are owned by a specific user id
+
+app.get('/api/v1/get_usercollections', songs.getCollectionsByUser); // Get all collections made by a specific user id
+
+// Score-related Endpoints (retrieving score information)
+app.get('/api/v1/get_scores', scores.getScoresByChartAndUserId);  // Get all scores on a given chart id by a given user id;
+
+/*
 app.get('/api/users', db.getUsers);
 
 app.get('/api/users/:uid', db.getUserById);
@@ -32,8 +49,6 @@ app.get('/api/songs', db.getSongs);
 app.get('/api/songs/:sid', db.getSongById);
 
 app.get('/api/games', db.getGames);
-
-app.get('/api/songs/games/:gid', db.getSongsByGame);
 
 app.get('/api/collections', db.getCollections);
 
@@ -56,6 +71,7 @@ app.post('/api/users', db.createUser);
 app.post('/api/scores', db.uploadScore);
 
 app.post('/api/collections', db.createCollection);
+*/
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);
