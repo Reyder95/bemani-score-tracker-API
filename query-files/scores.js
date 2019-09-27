@@ -1,5 +1,5 @@
 /*
-  A file for use with the API. Focuses primarily on song-based endpoints,
+  A file for use with the API. Focuses primarily on score-based endpoints,
   and will only deal with such.
 */
 
@@ -30,6 +30,28 @@ const getScoresByChartAndUserId = (req, res) => {
   });
 }
 
+const uploadScore = (req, res) => {
+  const {score, location, userid_fk, chartid_fk, grade, clearpercent, clearlamp} = req.body;
+
+  const query = 'INSERT INTO scores ' +
+  '(score, location, userid_fk, chartid_fk, grade, clearpercent, clearlamp)' +
+  'VALUES ($1, $2, $3, $4, $5, $6, $7)';
+
+  pool.query(query,
+            [score, location, userid_fk, chartid_fk, grade, clearpercent, clearlamp],
+            (error, results) => {
+    if (error)
+    {
+      res.status(400).json({
+        message: "Format error"
+      });
+    }
+    else
+      res.status(200).send(`Score added with ID: ${results.insertId}`);
+  });
+}
+
 module.exports = {
-  getScoresByChartAndUserId
+  getScoresByChartAndUserId,
+  uploadScore
 }

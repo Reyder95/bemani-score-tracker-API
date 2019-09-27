@@ -35,6 +35,8 @@ app.get('/api/v1/get_usercollections', songs.getCollectionsByUser); // Get all c
 // Score-related Endpoints (retrieving score information)
 app.get('/api/v1/get_scores', scores.getScoresByChartAndUserId);  // Get all scores on a given chart id by a given user id;
 
+app.post('/api/v1/upload_score', db.uploadScore);
+
 /*
 app.get('/api/users', db.getUsers);
 
